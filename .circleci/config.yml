@@ -43,4 +43,5 @@ workflows:
   default:
     jobs:
       - build-app
-      - test-app
+      - test-app:
+          requires: [build-app]
