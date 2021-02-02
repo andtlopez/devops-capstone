@@ -42,12 +42,15 @@ jobs:
 
   build-docker:
     docker:
-      - image: docker:17.05.0-ce-git
+      - image: circleci/golang:1.15
         auth:
           username: $DOCKER_USER
           password: $DOCKER_PASS
     steps:
       - checkout
+      - setup_remote_docker:
+          version: 19.03.13
+          docker_layer_caching: true
       - restore_cache:
           keys: [app-build]
       - run:
