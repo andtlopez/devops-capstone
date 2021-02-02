@@ -43,7 +43,7 @@ jobs:
   build-docker:
     docker:
       - image: circleci/python:3.6.7-stretch
-     steps:
+    steps:
       - checkout
       - restore_cache:
           keys: [app-build]
