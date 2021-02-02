@@ -39,9 +39,23 @@ jobs:
           command: |
             . venv/bin/activate
             make lint
+
+  build-docker:
+    docker:
+      - image: circleci/python:3.6.7-stretch
+     steps:
+      - checkout
+      - restore_cache:
+          keys: [app-build]
+      - run:
+          name: build docker
+          command: |
+            docker build --tag=andtlopez/devops-capstone .
 workflows:
   default:
     jobs:
       - build-app
       - test-app:
           requires: [build-app]
+      - build-docker:
+          requires: [test-app]
