@@ -43,15 +43,19 @@ jobs:
   build-docker:
     docker:
       - image: docker:17.05.0-ce-git
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
     steps:
       - checkout
       - restore_cache:
           keys: [app-build]
       - run:
-          name: build docker
+          name: build and push docker image
           command: |
-            service docker start
-            docker build --tag=andtlopez/devops-capstone .
+            docker build --tag=andtlopez/devops-capstone:${CIRCLE_WORKFLOW_ID:0:7} .
+            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+            docker push andtlopez/devops-capstone:${CIRCLE_WORKFLOW_ID:0:7}
 workflows:
   default:
     jobs:
