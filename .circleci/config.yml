@@ -50,6 +50,7 @@ jobs:
       - run:
           name: build docker
           command: |
+            service docker start
             docker build --tag=andtlopez/devops-capstone .
 workflows:
   default:
