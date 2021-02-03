@@ -1,0 +1,70 @@
+Parameters:
+
+  EnvironmentName:
+    Description: Environment name, used as a prefix for resources
+    Type: String
+
+  ClusterName:
+    Type: String
+    Default: DevOpsCapstone-EKS-CLUSTER
+    Description: The cluster name provided when the cluster was created. If it is incorrect, nodes will not be able to join the cluster.
+  
+  NodeGroupName:
+    Type: String
+    Default: DevOpsCapstone-NODE-GROUP
+    Description: Unique identifier for the Node Group.
+  
+  NodeInstanceType:
+    Description: Parameter to pass the EC2 instance type.
+    Type: String
+    Default: t3.micro
+
+Mappings:
+  PartitionMap:
+    aws:
+      EC2ServicePrincipal: "ec2.amazonaws.com"
+    aws-cn:
+      EC2ServicePrincipal: "ec2.amazonaws.com.cn"
+    aws-iso:
+      EC2ServicePrincipal: "ec2.c2s.ic.gov"
+    aws-iso-b:
+      EC2ServicePrincipal: "ec2.sc2s.sgov.gov"
+
+Resources:
+  
+  NodeInstanceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - !FindInMap [PartitionMap, !Ref "AWS::Partition", EC2ServicePrincipal]
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKS_CNI_Policy"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+      Path: /
+      RoleName: !Sub "${EnvironmentName}-EKS-INSTANCE-ROLE"
+  
+  EKSNodegroup:
+    Type: 'AWS::EKS::Nodegroup'
+    Properties:
+      ClusterName: !Sub ${ClusterName}
+      NodeRole: !Sub "arn:aws:iam::130045534405:role/${EnvironmentName}-EKS-INSTANCE-ROLE"
+      DiskSize: 20
+      InstanceTypes:
+        - Ref: NodeInstanceType
+      ScalingConfig:
+        MinSize: 1
+        DesiredSize: 2
+        MaxSize: 4
+      Labels:
+        Name: !Ref NodeGroupName
+      Subnets:
+        - Fn::ImportValue: !Sub "${EnvironmentName}-SN1"
+        - Fn::ImportValue: !Sub "${EnvironmentName}-SN2"

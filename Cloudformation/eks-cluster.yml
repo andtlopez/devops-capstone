@@ -1,0 +1,73 @@
+Parameters:
+
+  EnvironmentName:
+    Description: Environment name, used as a prefix for resources
+    Type: String
+
+Resources:
+  
+  ClusterInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - eks.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      RoleName: !Sub "${EnvironmentName}-EKS-CLUSTER-ROLE"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+        - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
+        - arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess
+
+  ClusterInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+      - !Ref ClusterInstanceRole
+
+  ClusterSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: EKS Cluster security group
+      GroupName: !Sub "${EnvironmentName}-EKS-CLUSTER-SEC-GROUP"
+      VpcId:
+        Fn::ImportValue: !Sub "${EnvironmentName}-VPCID"
+      Tags:
+      - Key: !Sub "kubernetes.io/cluster/${EnvironmentName}-EKS-CLUSTER"
+        Value: 'owned'
+      - Key: 'Name'
+        Value: !Sub "${EnvironmentName}-EKS-CLUSTER-SEC-GROUP"
+
+  Cluster:
+    Type: "AWS::EKS::Cluster"
+    Properties:
+      Name: !Sub "${EnvironmentName}-EKS-CLUSTER"
+      ResourcesVpcConfig:
+        SecurityGroupIds:
+          - !Ref ClusterSecurityGroup
+        SubnetIds:
+          - Fn::ImportValue: !Sub "${EnvironmentName}-SN1"
+          - Fn::ImportValue: !Sub "${EnvironmentName}-SN2"
+      RoleArn: !GetAtt ClusterInstanceRole.Arn
+      Version: 1.16
+
+Outputs:
+
+  ClusterSecurityGroup:
+    Description: Control plane security group
+    Value: !Ref ClusterSecurityGroup
+    Export:
+      Name: !Sub "${EnvironmentName}-EKS-CLUSTER-SEC-GROUP"
+
+  Cluster:
+    Description: Cluster name
+    Value: !Ref Cluster
+    Export:
+      Name: !Sub "${EnvironmentName}-EKS-CLUSTER"
