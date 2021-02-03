@@ -64,7 +64,7 @@ Resources:
         DesiredSize: 2
         MaxSize: 4
       Labels:
-        Name: !Ref NodeGroupName
+        Name: !Sub ${NodeGroupName}
       Subnets:
         - Fn::ImportValue: !Sub "${EnvironmentName}-SN1"
         - Fn::ImportValue: !Sub "${EnvironmentName}-SN2"
