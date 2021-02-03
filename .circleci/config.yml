@@ -57,8 +57,7 @@ jobs:
           command: |
             docker build --tag=andtlopez/devops-capstone .
             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-            docker push andtlopez/devops-capstone:${CIRCLE_WORKFLOW_ID:0:7}
-
+            docker push andtlopez/devops-capstone
   
 workflows:
   default:
