@@ -3,11 +3,14 @@
 # Check https://circleci.com/docs/2.0/language-python/ for more details
 #
 version: 2.1
+orbs:
+  aws-eks: circleci/aws-eks@x.y.z
+  kubernetes: circleci/kubernetes@x.y.z
+
 jobs:
   build-app:
     docker:
       - image: circleci/python:3.6.7-stretch
-
     steps:
       - checkout
       - run:
@@ -53,15 +56,36 @@ jobs:
       - run:
           name: build and push docker image
           command: |
-            docker build --tag=andtlopez/devops-capstone .
+            docker build --tag=andtlopez/devops-capstone:${CIRCLE_WORKFLOW_ID:0:7} .
             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-            docker push andtlopez/devops-capstone
-  
+            docker push andtlopez/devops-capstone:${CIRCLE_WORKFLOW_ID:0:7}
+
+  create-deployment:
+    executor: aws-eks/python3
+    parameters:
+      cluster-name:
+        description: |
+          Name of the EKS cluster
+        type: string
+    steps:
+      - checkout
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: << parameters.cluster-name >>
+          install-kubectl: true
+      - kubernetes/create-or-update-resource:
+          get-rollout-status: true
+          resource-file-path: kubernetes/k8s.yml
+          resource-name: deployment/devops-capstone
+
 workflows:
   default:
     jobs:
-      - build-app
-      - test-app:
-          requires: [build-app]
-      - build-docker:
-          requires: [test-app]
+      #- build-app
+      #- test-app:
+          #requires: [build-app]
+      #- build-docker:
+          #requires: [test-app]
+      - create-deployment:
+          cluster-name: DevOpsCapstone-EKS-CLUSTER
+          #requires:
+            #- build-docker
