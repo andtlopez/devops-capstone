@@ -12,8 +12,8 @@ spec:
   replicas: 2
   strategy:
     rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
+      maxSurge: 50%
+      maxUnavailable: 50%
     type: RollingUpdate
   minReadySeconds: 60
   progressDeadlineSeconds: 1800

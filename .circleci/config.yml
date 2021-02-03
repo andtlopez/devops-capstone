@@ -10,8 +10,6 @@ jobs:
 
     steps:
       - checkout
-      - restore_cache:
-          keys: [app-build]
       - run:
           name: install dependencies
           command: |
