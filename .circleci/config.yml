@@ -77,6 +77,18 @@ jobs:
           resource-file-path: kubernetes/k8s.yml
           resource-name: deployment/devops-capstone
 
+  update-deployment:
+    executor: aws-eks/python3
+    steps:
+      - checkout
+      - kubernetes/install-kubectl
+      - kubernetes/update-container-image:
+          container-image-updates: 'andtlopez/devops-capstone:${CIRCLE_WORKFLOW_ID:0:7}'
+          get-rollout-status: true
+          record: true
+          resource-name: deployment/devops-capstone
+
+
 workflows:
   default:
     jobs:
@@ -89,3 +101,6 @@ workflows:
           cluster-name: DevOpsCapstone-EKS-CLUSTER
           #requires:
             #- build-docker
+      - update-deployment:
+          requires:
+            - create-deployment
