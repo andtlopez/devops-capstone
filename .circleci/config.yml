@@ -79,15 +79,19 @@ jobs:
 
   update-deployment:
     executor: aws-eks/python3
+    docker:
+      - image: 'cimg/base:stable'
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
     steps:
       - checkout
       - kubernetes/install-kubectl
       - kubernetes/update-container-image:
-          container-image-updates: 'andtlopez/devops-capstone:${CIRCLE_WORKFLOW_ID:0:7}'
+          container-image-updates: andtlopez/devops-capstone
           get-rollout-status: true
           record: true
           resource-name: deployment/devops-capstone
-
 
 workflows:
   default:
