@@ -5,7 +5,7 @@
 version: 2.1
 orbs:
   aws-eks: circleci/aws-eks@1.0.3
-  kubernetes: circleci/kubernetes@0.11.2
+  kubernetes: circleci/kubernetes@1.0.0
 
 jobs:
   build-app:
@@ -60,7 +60,7 @@ jobs:
             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
             docker push andtlopez/devops-capstone:${CIRCLE_WORKFLOW_ID:0:7}
 
-  create-deployment:
+  update-deployment:
     executor: aws-eks/python3
     parameters:
       cluster-name:
@@ -76,17 +76,6 @@ jobs:
           get-rollout-status: true
           resource-file-path: kubernetes/k8s.yml
           resource-name: deployment/devops-capstone
-
-  update-deployment:
-    executor: aws-eks/python3
-    docker:
-      - image: 'cimg/base:stable'
-        auth:
-          username: $DOCKER_USER
-          password: $DOCKER_PASS
-    steps:
-      - checkout
-      - kubernetes/install-kubectl
       - kubernetes/update-container-image:
           container-image-updates: andtlopez/devops-capstone
           get-rollout-status: true
@@ -101,10 +90,7 @@ workflows:
           #requires: [build-app]
       #- build-docker:
           #requires: [test-app]
-      - create-deployment:
+      - update-deployment:
           cluster-name: DevOpsCapstone-EKS-CLUSTER
           #requires:
             #- build-docker
-      - update-deployment:
-          requires:
-            - create-deployment
