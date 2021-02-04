@@ -29,8 +29,8 @@ jobs:
             sudo chmod +x /bin/hadolint 
       - save_cache:
           paths:
-            - ./
-          key: app-build
+            - /home/circleci/project/venv
+          key: build-app
   
   test-app:
     docker:
@@ -38,7 +38,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [app-build]
+          keys: [build-app]
       - run:
           name: run lint
           command: |
@@ -56,7 +56,7 @@ jobs:
       - setup_remote_docker:
           version: 19.03.13
       - restore_cache:
-          keys: [app-build]
+          keys: [build-app]
       - run:
           name: build and push docker image
           command: |
@@ -89,10 +89,10 @@ workflows:
   default:
     jobs:
       - build-app
-      #- test-app:
-      #    requires: [build-app]
-      #- build-docker:
-      #    requires: [test-app]
-      #- update-deployment:
-       #   cluster-name: DevOpsCapstone-EKS-CLUSTER
-       #   requires: [build-docker]
+      - test-app:
+          requires: [build-app]
+      - build-docker:
+          requires: [test-app]
+      - update-deployment:
+          cluster-name: DevOpsCapstone-EKS-CLUSTER
+          requires: [build-docker]
