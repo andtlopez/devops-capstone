@@ -20,6 +20,8 @@ jobs:
             ls -l
             python3 -m venv venv
             . venv/bin/activate
+            pwd
+            ls -l
             pip install -r requirements.txt
             make install
             # Install hadolint
@@ -87,10 +89,10 @@ workflows:
   default:
     jobs:
       - build-app
-      - test-app:
-          requires: [build-app]
-      - build-docker:
-          requires: [test-app]
-      - update-deployment:
-          cluster-name: DevOpsCapstone-EKS-CLUSTER
-          requires: [build-docker]
+      #- test-app:
+      #    requires: [build-app]
+      #- build-docker:
+      #    requires: [test-app]
+      #- update-deployment:
+       #   cluster-name: DevOpsCapstone-EKS-CLUSTER
+       #   requires: [build-docker]
