@@ -20,17 +20,10 @@ jobs:
             ls -l
             python3 -m venv venv
             . venv/bin/activate
-            pwd
-            ls -l
-            pip install -r requirements.txt
             make install
-            # Install hadolint
-            sudo wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64
-            sudo chmod +x /bin/hadolint 
       - save_cache:
           paths:
             - /home/circleci/project/venv
-            - /bin
           key: devops-app
   
   test-app:
@@ -44,6 +37,7 @@ jobs:
           name: run lint
           command: |
             . venv/bin/activate
+            make install
             make lint
 
   build-docker:
