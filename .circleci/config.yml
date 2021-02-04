@@ -30,7 +30,8 @@ jobs:
       - save_cache:
           paths:
             - /home/circleci/project/venv
-          key: build-app
+            - /bin
+          key: devops-app
   
   test-app:
     docker:
@@ -38,7 +39,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [build-app]
+          keys: [devops-app]
       - run:
           name: run lint
           command: |
@@ -56,7 +57,7 @@ jobs:
       - setup_remote_docker:
           version: 19.03.13
       - restore_cache:
-          keys: [build-app]
+          keys: [devops-app]
       - run:
           name: build and push docker image
           command: |
