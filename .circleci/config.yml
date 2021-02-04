@@ -79,7 +79,7 @@ jobs:
           name: update image
           command: |
             kubectl set image deployments/devops-capstone devops-capstone=andtlopez/devops-capstone:${CIRCLE_WORKFLOW_ID:0:7}
-      - get-rollout-status:
+      - kubernetes/get-rollout-status:
           resource-name: deployment/devops-capstone
           watch-rollout-status: true
 workflows:
